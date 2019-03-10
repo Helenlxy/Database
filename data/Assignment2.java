@@ -37,7 +37,7 @@ public class Assignment2 extends JDBCSubmission {
                 conn.close();
             } catch (SQLException se) {
                 System.err.println("SQL Exception." +
-                    "<Message>: " + se.getMessage());
+                        "<Message>: " + se.getMessage());
                 return false;
             }
         }
@@ -47,7 +47,31 @@ public class Assignment2 extends JDBCSubmission {
     @Override
     public ElectionCabinetResult electionSequence(String countryName) {
         // Implement this method!
-        return null;
+        List<Integer> elections = new ArrayList<Integer>();
+        List<Integer> cabinets = new ArrayList<Integer>();
+
+        try {
+            String queryString = "select election.id as e_id, cabinet.id as c_id" +
+            "from election" +
+            "join country on country_id = country.id" +
+            "join cabinet on election_id = election.id" +
+            "where country.name = ?" +
+            "order by extract(year from e_date) desc";
+            PreparedStatement ps = conn.prepareStatement(queryString);
+            ps.setString(1, countryName);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()){
+                elections.add(rs.getInt("e_id"));
+                cabinets.add(rs.getInt("c_id"));
+            }
+
+        } catch (SQLException se) {
+            System.err.println("SQL Exception." +
+                    "<Message>: " + se.getMessage());
+        }
+        return new ElectionCabinetResult(elections, cabinets);
     }
 
     @Override
@@ -56,10 +80,10 @@ public class Assignment2 extends JDBCSubmission {
         List<Integer> ids = new ArrayList<Integer>();
 
         try{
-            String description = new String('');
+            String description = new String("");
             String queryString = "SELECT description FROM politician_president WHERE politician_president.id = ?";
             PreparedStatement ps = conn.prepareStatement(queryString);
-            ps.setString(1, politicianName);
+            ps.setString(1, String.valueOf(politicianName));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 description = rs.getString("description");
@@ -73,7 +97,7 @@ public class Assignment2 extends JDBCSubmission {
                     int id = rs1.getInt("id");
                     if(id != politicianName){
                         ids.add(id);
-                    } 
+                    }
                 }
             }
         }catch (SQLException se)
@@ -91,4 +115,3 @@ public class Assignment2 extends JDBCSubmission {
     }
 
 }
-
